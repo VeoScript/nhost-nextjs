@@ -3,25 +3,44 @@ import React from 'react'
 import Head from 'next/head'
 import Router from 'next/router'
 import Link from 'next/link'
+import LoadingPage from '../components/LoadingPage'
 import CustomToast from '../utils/CustomToast'
 import { useForm } from 'react-hook-form'
 import { Toaster, toast } from 'react-hot-toast'
+import { useAuthLoading, useAuthenticated } from '@nhost/react'
 
 interface FormData {
+  name: string
   email: string
   password: string
   repassword: string
 }
 
 const SignUp: NextPage = () => { 
+
+  const isLoading = useAuthLoading()
+  const isAuthenticated = useAuthenticated()
   const {
     handleSubmit,
     register,
     reset,
     formState: { isSubmitting }
   } = useForm<FormData>()
+
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      Router.push('/')
+    }
+  })
+
+  if (isLoading) {
+    return (
+      <LoadingPage />
+    )
+  }
   
   const onSignUp = async (formData: FormData) => {
+    const name = formData.name
     const email = formData.email
     const password = formData.password
     const repassword = formData.repassword
@@ -43,7 +62,7 @@ const SignUp: NextPage = () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ name, email, password })
     })
 
     if (!nhostSignUp.ok) {
@@ -63,7 +82,7 @@ const SignUp: NextPage = () => {
       <CustomToast
         t={t}
         toast={toast}
-        toastMessage="Successfull! Thank you for signing up."
+        toastMessage="Successfull! Thank you for signing up. Check your email for verification. See your spam folder if the email is not in your inbox."
         toastType="Success"
       />
     ))
@@ -85,6 +104,12 @@ const SignUp: NextPage = () => {
             onSubmit={handleSubmit(onSignUp)}
             className="inline-block items-center w-full space-y-1"
           >
+            <input
+              type="name"
+              placeholder="Your name"
+              {...register('name', { required: true })}
+              className="outline-none w-full p-3 rounded-lg border-2 border-zinc-500 text-xl"
+            />
             <input
               type="email"
               placeholder="Enter Email"

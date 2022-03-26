@@ -5,7 +5,10 @@ import { nhost } from '../../../utils/Nhost'
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const signUpResponse = await nhost.auth.signUp({
     email: req.body.email,
-    password: req.body.password
+    password: req.body.password,
+    options: {
+      displayName: req.body.name
+    }
   })
 
   if (signUpResponse.error) {
