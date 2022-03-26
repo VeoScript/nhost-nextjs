@@ -3,9 +3,11 @@ import React from 'react'
 import Head from 'next/head'
 import Router from 'next/router'
 import Link from 'next/link'
+import LoadingPage from '../components/LoadingPage'
 import CustomToast from '../utils/CustomToast'
 import { useForm } from 'react-hook-form'
 import { Toaster, toast } from 'react-hot-toast'
+import { useAuthLoading, useAuthenticated } from '@nhost/react'
 
 interface FormData {
   email: string
@@ -13,12 +15,27 @@ interface FormData {
 }
 
 const SignIn: NextPage = () => {
+
+  const isLoading = useAuthLoading()
+  const isAuthenticated = useAuthenticated()
   const {
     handleSubmit,
     register,
     reset,
     formState: { isSubmitting }
   } = useForm<FormData>()
+
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      Router.push('/')
+    }
+  })
+
+  if (isLoading) {
+    return (
+      <LoadingPage />
+    )
+  }
 
   const onSignIn = async (formData: FormData) => {
     const email = formData.email
